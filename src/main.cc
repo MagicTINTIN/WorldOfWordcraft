@@ -275,11 +275,10 @@ bool wordIn(const std::string &word, const std::vector<std::string> &list)
 
 int main(int argc, char const *argv[])
 {
-    // std::cout << std::string("être").length() << std::endl;
-    // return 1;
-    if (argc != 4 && argc != 5 && argc != 6)
+    if (argc < 4 || argc > 6)
     {
-        std::cerr << argv[0] << " takes 3 params (filepath in/out & number of words generated) [context_size] [end_ratio]\n";
+        std::cerr << "Usage: \n";
+        std::cerr << argv[0] << " <source_file> <output_file> <number_of_words_to_generate> [context_size] [end_ratio]\n";
         return 1;
     }
 

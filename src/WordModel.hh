@@ -9,68 +9,66 @@
 
 #include "utf8.hh"
 
-class ModelAtom
+class WordAtom
 {
 private:
 public:
-    ModelAtom();
-    ModelAtom get() {};
-    std::string toString() {return "";}
-    static const ModelAtom START_ATOM;
-    static const ModelAtom END_ATOM;
+    std::string value;
+    WordAtom(std::string v) : value(v) {}
+    bool empty() const { return value.empty(); }
+    std::string back() const { return  std::string(1,value.back()); }
+    std::string to_string() const { return value; }
 };
 
-class utf8Atom : ModelAtom
+std::ostream &operator<<(
+    std::ostream &stream,
+    const WordAtom &atom)
 {
-private:
-    std::string c;
-public:
-    utf8Atom(std::string content) : c(content) {}
-    static utf8Atom endAtom() { return utf8Atom("\n"); }
-    static utf8Atom startAtom() { return utf8Atom(" "); }
-};
-
-ModelAtom::ModelAtom()
-{
+    return std::operator<<(stream, atom.to_string());
 }
 
 template <typename A>
-class ModelObject
+class Molecule
 {
 private:
     std::vector<A> atoms;
 
 public:
-    ModelObject() : atoms() {};
+    Molecule() : atoms() {};
     size_t size() { return atoms.size(); };
     std::vector<A> getAtoms() { return atoms; }
-    ModelObject<A> operator+(ModelObject<A> const &object)
+    Molecule<A> operator+(Molecule<A> const &object)
     {
         std::vector<A> copy = atoms;
         copy.insert(copy.end(), object.getAtoms().begin(), object.getAtoms().end());
         return copy;
     }
+    std::string to_string() {
+        std::string 
+        for (A a : atoms)
+
+    }
 };
 
-/* ############### MODELOBJECT TEMPLATE IMPLEMENTATION ############### */
+/* ############### Molecule TEMPLATE IMPLEMENTATION ############### */
 
-/* ############### WORDMODEL TEMPLATE IMPLEMENTATION ############### */
+/* ############### MoleculeModel TEMPLATE IMPLEMENTATION ############### */
 
 template <typename A>
-class WordModel
+class MoleculeModel
 {
 private:
     std::vector<size_t> lengthsFrequencies;
-    std::vector<std::map<ModelObject<A>, std::map<A, size_t>>> maps;
+    std::vector<std::map<Molecule<A>, std::map<A, size_t>>> maps;
     unsigned int contextSize;
     size_t totalWordsLearned;
     float end_ratio;
 
 public:
-    WordModel(int contextSize, float endRatio);
-    void addStr(ModelObject<A> str, A c);
+    MoleculeModel(int contextSize, float endRatio);
+    void addStr(Molecule<A> str, A c);
     void addLength(int length);
-    ModelObject<A> aggregateWordGen(ModelObject<A> begin);
+    Molecule<A> aggregateWordGen(Molecule<A> begin);
 };
 
 int randint(int min, int max)
@@ -83,12 +81,12 @@ int randint(int min, int max)
 }
 
 template <typename A>
-WordModel<A>::WordModel(int contextSize, float endRatio) : lengthsFrequencies(20), maps(contextSize), contextSize(contextSize), end_ratio(endRatio)
+MoleculeModel<A>::MoleculeModel(int contextSize, float endRatio) : lengthsFrequencies(20), maps(contextSize), contextSize(contextSize), end_ratio(endRatio)
 {
 }
 
 template <typename A>
-void WordModel<A>::addStr(ModelObject<A> ctx, A c)
+void MoleculeModel<A>::addStr(Molecule<A> ctx, A c)
 {
     size_t sizeOfStr = utf8_length(ctx);
     if (sizeOfStr < contextSize)
@@ -110,7 +108,7 @@ void WordModel<A>::addStr(ModelObject<A> ctx, A c)
 }
 
 template <typename A>
-void WordModel<A>::addLength(int length)
+void MoleculeModel<A>::addLength(int length)
 {
     totalWordsLearned++;
     for (int i = lengthsFrequencies.size(); i < length; i++)
@@ -122,10 +120,10 @@ void WordModel<A>::addLength(int length)
 }
 
 template <typename A>
-ModelObject<A> WordModel<A>::aggregateWordGen(ModelObject<A> begin)
+Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
 {
     size_t sizeOfStr = utf8_length(begin);
-    ModelObject<A> ctxSearch;
+    Molecule<A> ctxSearch;
     int ctxSize = contextSize - 1;
     if (sizeOfStr < contextSize)
     {

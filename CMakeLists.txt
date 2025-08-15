@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 # Adding sources
 set(SOURCES
     src/main.cc
-    src/WordModel.cc
+    # src/WordModel.cc
     src/utf8.cc
 )
 

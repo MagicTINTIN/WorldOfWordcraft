@@ -44,7 +44,7 @@ int main(int argc, char const *argv[])
         end_ratio = atof(argv[5]);
     }
 
-    WordModel model(contextSize, end_ratio);
+    WordModel<WordAtom> model(contextSize, end_ratio);
 
     std::ifstream infile(argv[1]);
     std::ofstream outfile(argv[2]);
@@ -84,8 +84,8 @@ int main(int argc, char const *argv[])
     int maxTries = 0;
     for (size_t i = 0; i < generatedNumber; i++)
     {
-        std::string newWord = "";
-        while (newWord.empty() || newWord.back() != '\n')
+        Molecule<WordAtom> newWord;
+        while (newWord.empty() || newWord.back() != "\n")
         {
             newWord = model.aggregateWordGen(newWord);
         }

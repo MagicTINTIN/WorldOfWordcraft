@@ -48,9 +48,9 @@ MoleculeModel<A>::MoleculeModel(int contextSize, float endRatio) : lengthsFreque
 template <typename A>
 void MoleculeModel<A>::addStr(Molecule<A> ctx, A c)
 {
-    size_t sizeOfStr = utf8_length(ctx);
+    size_t sizeOfStr = ctx.size();// utf8_length(ctx);
     if (sizeOfStr < contextSize)
-        ctx = " " + ctx;
+        ctx = Molecule<A>(A(" ")) + ctx;
     else
         sizeOfStr--;
     if (maps.at(sizeOfStr).count(ctx))
@@ -82,22 +82,23 @@ void MoleculeModel<A>::addLength(int length)
 template <typename A>
 Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
 {
-    size_t sizeOfStr = utf8_length(begin);
+    size_t sizeOfStr = begin.size(); //utf8_length(begin);
     Molecule<A> ctxSearch;
     int ctxSize = contextSize - 1;
     if (sizeOfStr < contextSize)
     {
-        ctxSearch = Molecule<WordAtom>(WordAtom(" ")) + begin;
+        ctxSearch = Molecule<A>(A(" ")) + begin;
         ctxSize = sizeOfStr;
     }
     else
     {
-        int beginIndex = std::max(0, (int)sizeOfStr - (int)contextSize);
-        ctxSearch = ""; // begin.substr(beginIndex, contextSize);
-        for (size_t i = 0; i < contextSize; i++)
-        {
-            ctxSearch += utf8_char_at(begin, beginIndex + i);
-        }
+        // int beginIndex = std::max(0, (int)sizeOfStr - (int)contextSize);
+        // ctxSearch = ""; // begin.substr(beginIndex, contextSize);
+        // for (size_t i = 0; i < contextSize; i++)
+        // {
+        //     ctxSearch += utf8_char_at(begin, beginIndex + i);
+        // }
+        ctxSearch = begin.subMolecule(contextSize);
     }
     if (!maps.at(ctxSize).count(ctxSearch) || maps.at(ctxSize)[ctxSearch].empty())
         return begin + WordAtom("\n");

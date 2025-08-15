@@ -1,5 +1,5 @@
 # World Of Wordcraft
-> a word generator
+> a word generator based on an input dictionary and occurrence statistics *(machine learning du pauvre)*
 
 ---
 To compile and start it

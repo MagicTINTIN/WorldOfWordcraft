@@ -6,72 +6,9 @@
 #include <algorithm>
 #include <random>
 #include <memory>
+#include "atomsAndMolecules.hh"
 
 #include "utf8.hh"
-
-class WordAtom
-{
-private:
-public:
-    std::string value;
-    WordAtom(std::string v) : value(v) {}
-    // bool empty() const { return value.empty(); }
-    // std::string back() const { return  std::string(1,value.back()); }
-    std::string to_string() const { return value; }
-};
-
-std::ostream &operator<<(
-    std::ostream &stream,
-    const WordAtom &atom)
-{
-    return std::operator<<(stream, atom.to_string());
-}
-
-template <typename A>
-class Molecule
-{
-private:
-    std::vector<A> atoms;
-
-public:
-    Molecule() : atoms() {};
-    size_t size() { return atoms.size(); };
-    std::vector<A> getAtoms() { return atoms; }
-    Molecule<A> operator+(const Molecule<A> &molecule)
-    {
-        std::vector<A> copy = atoms;
-        copy.insert(copy.end(), molecule.getAtoms().begin(), molecule.getAtoms().end());
-        return copy;
-    }
-    Molecule<A> operator+(const A &atom)
-    {
-        std::vector<A> copy = atoms;
-        copy.emplace_back(atom);
-        return copy;
-    }
-    Molecule<A>& operator+=(const A &atom)
-    {
-        atoms.emplace_back(atom);
-        return *this;
-    }
-    std::string to_string() {
-        std::string ret;
-        for (A a : atoms)
-            ret+= a.to_string();
-        return to_string();
-    }
-
-    bool empty() const { return atoms.empty(); }
-    A back() const { return atoms.back(); }
-};
-
-template <typename A>
-std::ostream &operator<<(
-    std::ostream &stream,
-    const Molecule<A> &molecule)
-{
-    return std::operator<<(stream, molecule.to_string());
-}
 
 /* ############### Molecule TEMPLATE IMPLEMENTATION ############### */
 
@@ -150,7 +87,7 @@ Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
     int ctxSize = contextSize - 1;
     if (sizeOfStr < contextSize)
     {
-        ctxSearch = " " + begin;
+        ctxSearch = Molecule<WordAtom>(WordAtom(" ")) + begin;
         ctxSize = sizeOfStr;
     }
     else
@@ -163,13 +100,13 @@ Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
         }
     }
     if (!maps.at(ctxSize).count(ctxSearch) || maps.at(ctxSize)[ctxSearch].empty())
-        return begin + "\n";
+        return begin + WordAtom("\n");
 
     size_t sum(0), numberOfEOL(0);
     for (auto it = maps.at(ctxSize)[ctxSearch].begin(); it != maps.at(ctxSize)[ctxSearch].end(); ++it)
     {
         // std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
-        if (it->first.compare("\n") == 0)
+        if (it->first.compare(WordAtom("\n")) == 0)
             numberOfEOL += it->second;
         else
             sum += it->second;
@@ -185,13 +122,13 @@ Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
     sum += EOLMultiplierFactor * numberOfEOL;
 
     if (sum == 0)
-        return begin + "\n";
+        return begin + WordAtom("\n");
 
     size_t indexCharChosen = randint(0, sum - 1);
     for (auto it = maps.at(ctxSize)[ctxSearch].begin(); it != maps.at(ctxSize)[ctxSearch].end(); ++it)
     {
         // std::string current = it->first;
-        if (it->first.compare("\n") == 0)
+        if (it->first.compare(WordAtom("\n")) == 0)
         {
             if (indexCharChosen < it->second * EOLMultiplierFactor)
                 return begin + it->first;
@@ -206,5 +143,5 @@ Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
         }
     }
 
-    return begin + "\n";
+    return begin + WordAtom("\n");
 }

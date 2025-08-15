@@ -6,6 +6,7 @@
 #include <map>
 #include <random>
 
+#include "atomsAndMolecules.hh"
 #include "utf8.hh"
 #include "WordModel.hh"
 
@@ -80,7 +81,7 @@ int main(int argc, char const *argv[])
         }
     }
     printf("\rStats generated.\nStart generating words...\n###########################################\n");
-    std::vector<std::string> foundWords(0);
+    std::vector<Molecule<WordAtom>> foundWords(0);
     int maxTries = 0;
     for (size_t i = 0; i < generatedNumber; i++)
     {
@@ -89,7 +90,7 @@ int main(int argc, char const *argv[])
         {
             newWord = model.aggregateWordGen(newWord);
         }
-        if (wordIn(newWord.to_string(), foundWords))
+        if (wordIn(newWord, foundWords))
         {
             maxTries++;
             if (maxTries < MAX_GENERATION_TRIES)

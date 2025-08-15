@@ -15,8 +15,8 @@ private:
 public:
     std::string value;
     WordAtom(std::string v) : value(v) {}
-    bool empty() const { return value.empty(); }
-    std::string back() const { return  std::string(1,value.back()); }
+    // bool empty() const { return value.empty(); }
+    // std::string back() const { return  std::string(1,value.back()); }
     std::string to_string() const { return value; }
 };
 
@@ -37,18 +37,41 @@ public:
     Molecule() : atoms() {};
     size_t size() { return atoms.size(); };
     std::vector<A> getAtoms() { return atoms; }
-    Molecule<A> operator+(Molecule<A> const &object)
+    Molecule<A> operator+(const Molecule<A> &molecule)
     {
         std::vector<A> copy = atoms;
-        copy.insert(copy.end(), object.getAtoms().begin(), object.getAtoms().end());
+        copy.insert(copy.end(), molecule.getAtoms().begin(), molecule.getAtoms().end());
         return copy;
     }
-    std::string to_string() {
-        std::string 
-        for (A a : atoms)
-
+    Molecule<A> operator+(const A &atom)
+    {
+        std::vector<A> copy = atoms;
+        copy.emplace_back(atom);
+        return copy;
     }
+    Molecule<A>& operator+=(const A &atom)
+    {
+        atoms.emplace_back(atom);
+        return *this;
+    }
+    std::string to_string() {
+        std::string ret;
+        for (A a : atoms)
+            ret+= a.to_string();
+        return to_string();
+    }
+
+    bool empty() const { return atoms.empty(); }
+    A back() const { return atoms.back(); }
 };
+
+template <typename A>
+std::ostream &operator<<(
+    std::ostream &stream,
+    const Molecule<A> &molecule)
+{
+    return std::operator<<(stream, molecule.to_string());
+}
 
 /* ############### Molecule TEMPLATE IMPLEMENTATION ############### */
 

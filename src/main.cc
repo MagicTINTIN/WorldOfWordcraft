@@ -44,7 +44,7 @@ int main(int argc, char const *argv[])
         end_ratio = atof(argv[5]);
     }
 
-    WordModel<WordAtom> model(contextSize, end_ratio);
+    MoleculeModel<WordAtom> model(contextSize, end_ratio);
 
     std::ifstream infile(argv[1]);
     std::ofstream outfile(argv[2]);
@@ -70,10 +70,10 @@ int main(int argc, char const *argv[])
         model.addLength(length);
         for (size_t lastc = 0; lastc < length; lastc++)
         {
-            std::string ctx("");
+            Molecule<WordAtom> ctx;
             for (size_t i = std::max(0, (int)lastc - contextSize); i < lastc && lastc > 0; i++)
             {
-                ctx += utf8_char_at(line, i);
+                ctx += WordAtom(utf8_char_at(line, i));
             }
             std::string charToPut = utf8_char_at(line, lastc, "\n");
             model.addStr(ctx, charToPut);
@@ -85,11 +85,11 @@ int main(int argc, char const *argv[])
     for (size_t i = 0; i < generatedNumber; i++)
     {
         Molecule<WordAtom> newWord;
-        while (newWord.empty() || newWord.back() != "\n")
+        while (newWord.empty() || newWord.back().to_string() != "\n")
         {
             newWord = model.aggregateWordGen(newWord);
         }
-        if (wordIn(newWord, foundWords))
+        if (wordIn(newWord.to_string(), foundWords))
         {
             maxTries++;
             if (maxTries < MAX_GENERATION_TRIES)

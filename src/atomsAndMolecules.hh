@@ -3,17 +3,6 @@
 #include <vector>
 #include <iostream>
 
-template <typename A>
-bool wordIn(const Molecule<A> &molecule, const std::vector<Molecule<A>> &list)
-{
-    for (size_t i = 0; i < list.size(); i++)
-    {
-        if (list.at(i).to_string().compare(molecule.to_string()) == 0)
-            return true;
-    }
-    return false;
-}
-
 class WordAtom
 {
 private:
@@ -41,34 +30,44 @@ private:
 
 public:
     Molecule() : atoms() {};
-    size_t size() { return atoms.size(); };
-    std::vector<A> getAtoms() { return atoms; }
-    Molecule<A> operator+(const Molecule<A> &molecule)
+    Molecule(A atom) : atoms{atom} {};
+    Molecule(std::vector<A> atoms_array) : atoms(atoms_array) {};
+    size_t size() const { return atoms.size(); };
+    std::vector<A> getAtoms() const { return atoms; }
+    Molecule<A> operator+(const Molecule<A> &molecule) const
     {
         std::vector<A> copy = atoms;
         copy.insert(copy.end(), molecule.getAtoms().begin(), molecule.getAtoms().end());
         return copy;
     }
-    Molecule<A> operator+(const A &atom)
+    Molecule<A> operator+(const A &atom) const
     {
         std::vector<A> copy = atoms;
         copy.emplace_back(atom);
         return copy;
     }
-    Molecule<A>& operator+=(const A &atom)
+    Molecule<A> operator+=(const A &atom)
     {
         atoms.emplace_back(atom);
         return *this;
     }
-    std::string to_string() const {
+    Molecule<A> subMolecule(size_t size)
+    {
+        std::vector<A> sub;
+        sub.insert(sub.end(), atoms.begin(), atoms.begin() + std::min(size, atoms.size()) - 1);
+        return sub;
+    }
+    std::string to_string() const
+    {
         std::string ret;
         for (A a : atoms)
-            ret+= a.to_string();
+            ret += a.to_string();
         return to_string();
     }
 
     bool empty() const { return atoms.empty(); }
     A back() const { return atoms.back(); }
+    size_t size() { return atoms.size(); }
 };
 
 template <typename A>
@@ -77,4 +76,18 @@ std::ostream &operator<<(
     const Molecule<A> &molecule)
 {
     return std::operator<<(stream, molecule.to_string());
+}
+
+
+
+
+template <typename A>
+bool wordIn(Molecule<A> &molecule, std::vector<Molecule<A>> &list)
+{
+    for (size_t i = 0; i < list.size(); i++)
+    {
+        if (list.at(i).to_string().compare(molecule.to_string()) == 0)
+            return true;
+    }
+    return false;
 }

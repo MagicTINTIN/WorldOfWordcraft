@@ -14,10 +14,10 @@ class ModelAtom
 private:
 public:
     ModelAtom();
-    ModelAtom get();
-    static ModelAtom endAtom() { return ModelAtom(); }
-    static ModelAtom startAtom() { return ModelAtom(); }
-
+    ModelAtom get() {};
+    std::string toString() {return "";}
+    static const ModelAtom START_ATOM;
+    static const ModelAtom END_ATOM;
 };
 
 class utf8Atom : ModelAtom

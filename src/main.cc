@@ -64,6 +64,8 @@ int main_chars(int argc, char const *argv[])
             model.addStr(ctx, charToPut);
         }
     }
+    printf("\n");
+    model.printMaps();
     printf("\rStats generated.\nStart generating words...\n###########################################\n");
     std::vector<Molecule<CharAtom>> foundWords(0);
     int maxTries = 0;
@@ -148,6 +150,7 @@ int main_words(int argc, char const *argv[])
             model.addStr(ctx, words[lastw]);
         }
     }
+    model.printMaps();
     printf("\rStats generated.\nStart generating sentences...\n###########################################\n");
     std::vector<Molecule<WordAtom>> foundSentences(0);
     int maxTries = 0;
@@ -195,11 +198,12 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
+    printf("Token mode: %s\n", argv[1]);
     if (std::string(argv[1]) == "char")
         return main_chars(argc, argv);
     else if (std::string(argv[1]) == "word")
         return main_words(argc, argv);
     else
-        fprintf(stderr, "Token mode '%s' is unkown.\nOnly 'char' and 'word' are currently supported.\n");
+        fprintf(stderr, "Token mode '%s' is unkown.\nOnly 'char' and 'word' are currently supported.\n", argv[1]);
     return 7;
 }

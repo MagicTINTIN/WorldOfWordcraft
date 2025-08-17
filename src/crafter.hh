@@ -31,6 +31,7 @@ public:
     void addStr(Molecule<A> str, A c);
     void addLength(int length);
     Molecule<A> aggregateWordGen(Molecule<A> begin);
+    void printMaps();
 };
 
 int randint(int min, int max)
@@ -40,6 +41,30 @@ int randint(int min, int max)
 
     std::uniform_int_distribution<> dis(min, max);
     return dis(gen);
+}
+
+template <typename A>
+void MoleculeModel<A>::printMaps()
+{
+    int size = 0;
+    for (const std::map<Molecule<A>, std::map<A, size_t>> &ms : maps)
+    {
+        printf("Context size=%d\n", size);
+        for (auto it = ms.begin(); it != ms.end(); ++it)
+        {
+            std::cout << "CONTEXT: " << it->first << std::endl;
+            for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+            {
+                std::cout << "> '" << it2->first << "': " << it2->second << std::endl;
+                // std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
+                // if (it->first.compare(_end) == 0)
+                //     numberOfEOL += it->second;
+                // else
+                //     sum += it->second;
+            }
+        }
+        size++;
+    }
 }
 
 template <typename A>

@@ -3,6 +3,30 @@
 #include <vector>
 #include <iostream>
 
+class CharAtom
+{
+private:
+public:
+    std::string value;
+    CharAtom(std::string v) : value(v) {}
+    // bool empty() const { return value.empty(); }
+    // std::string back() const { return  std::string(1,value.back()); }
+    int compare(const CharAtom &other) const { return value != other.value; }
+    std::string to_string() const { return value; }
+
+    bool operator<(const CharAtom &atom) const
+    {
+        return value < atom.value;
+    }
+};
+
+std::ostream &operator<<(
+    std::ostream &stream,
+    const CharAtom &atom)
+{
+    return std::operator<<(stream, atom.value);
+}
+
 class WordAtom
 {
 private:
@@ -92,11 +116,11 @@ public:
         Molecule<A> sub;
         sub.atoms.insert(sub.atoms.end(), atoms.begin() + std::max(0, (int) begin), atoms.begin() + std::min(end, atoms.size()) - 1);
         
-        // std::string ret;
-        // for (A a : atoms)
-        //     ret += a.to_string();
+        std::string sub_str;
+        for (A a : sub.atoms)
+            sub_str += a.to_string();
 
-        sub.str = str.substr(std::max(0, (int) begin), std::min(end, str.size()) - 1);
+        sub.str = sub_str;//str.substr(std::max(0, (int) begin), std::min(end, str.size()) - 1);
         return sub;
     }
     std::string to_string() const

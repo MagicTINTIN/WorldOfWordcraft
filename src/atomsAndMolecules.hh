@@ -16,7 +16,7 @@ public:
 
     bool operator<(const WordAtom &atom) const
     {
-        return to_string() < atom.to_string();
+        return value < atom.value;
     }
 };
 
@@ -24,7 +24,7 @@ std::ostream &operator<<(
     std::ostream &stream,
     const WordAtom &atom)
 {
-    return std::operator<<(stream, atom.to_string());
+    return std::operator<<(stream, atom.value);
 }
 
 template <typename A>
@@ -32,6 +32,8 @@ class Molecule
 {
 private:
     std::vector<A> atoms;
+
+    std::string str;
 
 public:
     Molecule() : atoms() {};
@@ -41,38 +43,46 @@ public:
     std::vector<A> getAtoms() const { return atoms; }
     Molecule<A> operator+(const Molecule<A> &molecule) const
     {
-        std::vector<A> copy = atoms;
-        copy.insert(copy.end(), molecule.getAtoms().begin(), molecule.getAtoms().end());
+        Molecule<A> copy;
+        copy.atoms = atoms;
+        copy.atoms.insert(copy.atoms.end(), molecule.atoms.begin(), molecule.atoms.end());
+        copy.str = str + molecule.str;
         return copy;
     }
     bool operator<(const Molecule<A> &molecule) const
     {
-        return to_string() < molecule.to_string();
+        return str < molecule.str;
     }
 
     Molecule<A> operator+(const A &atom) const
     {
-        std::vector<A> copy = atoms;
-        copy.emplace_back(atom);
+        Molecule<A> copy;
+        copy.atoms = atoms;
+        copy.atoms.emplace_back(atom);
+        copy.str = str + atom.to_string();
         return copy;
     }
     Molecule<A> operator+=(const A &atom)
     {
         atoms.emplace_back(atom);
+        str += atom.to_string();
         return *this;
     }
     Molecule<A> subMolecule(size_t size)
     {
-        std::vector<A> sub;
-        sub.insert(sub.end(), atoms.begin(), atoms.begin() + std::min(size, atoms.size()) - 1);
+        Molecule<A> sub;
+        sub.atoms.insert(sub.atoms.end(), atoms.begin(), atoms.begin() + std::min(size, atoms.size()) - 1);
+        
+        // std::string ret;
+        // for (A a : atoms)
+        //     ret += a.to_string();
+
+        sub.str = str.substr(std::min(size, str.size()) - 1);
         return sub;
     }
     std::string to_string() const
     {
-        std::string ret;
-        for (A a : atoms)
-            ret += a.to_string();
-        return to_string();
+        return str;
     }
 
     bool empty() const { return atoms.empty(); }

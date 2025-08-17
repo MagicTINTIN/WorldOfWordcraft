@@ -1,12 +1,35 @@
+#pragma once
 #include <string>
-#include <iostream>
 #include <vector>
-#include <algorithm>
 #include <map>
+#include <iostream>
+#include <algorithm>
 #include <random>
+#include <memory>
+#include "atomsAndMolecules.hh"
 
 #include "utf8.hh"
-#include "WordModel.hh"
+
+/* ############### Molecule TEMPLATE IMPLEMENTATION ############### */
+
+/* ############### MoleculeModel TEMPLATE IMPLEMENTATION ############### */
+
+template <typename A>
+class MoleculeModel
+{
+private:
+    std::vector<size_t> lengthsFrequencies;
+    std::vector<std::map<Molecule<A>, std::map<A, size_t>>> maps;
+    unsigned int contextSize;
+    size_t totalWordsLearned;
+    float end_ratio;
+
+public:
+    MoleculeModel(int contextSize, float endRatio);
+    void addStr(Molecule<A> str, A c);
+    void addLength(int length);
+    Molecule<A> aggregateWordGen(Molecule<A> begin);
+};
 
 int randint(int min, int max)
 {
@@ -17,19 +40,17 @@ int randint(int min, int max)
     return dis(gen);
 }
 
-WordModel::WordModel(int contextSize, float endRatio) : lengthsFrequencies(20), maps(contextSize), contextSize(contextSize), end_ratio(endRatio)
+template <typename A>
+MoleculeModel<A>::MoleculeModel(int contextSize, float endRatio) : lengthsFrequencies(20), maps(contextSize), contextSize(contextSize), end_ratio(endRatio)
 {
 }
 
-WordModel::~WordModel()
+template <typename A>
+void MoleculeModel<A>::addStr(Molecule<A> ctx, A c)
 {
-}
-
-void WordModel::addStr(std::string ctx, std::string c)
-{
-    size_t sizeOfStr = utf8_length(ctx);
+    size_t sizeOfStr = ctx.size(); // utf8_length(ctx);
     if (sizeOfStr < contextSize)
-        ctx = " " + ctx;
+        ctx = Molecule<A>(A(" ")) + ctx;
     else
         sizeOfStr--;
     if (maps.at(sizeOfStr).count(ctx))
@@ -41,12 +62,13 @@ void WordModel::addStr(std::string ctx, std::string c)
     }
     else
     {
-        maps.at(sizeOfStr).insert(std::make_pair(ctx, std::map<std::string, size_t>()));
+        maps.at(sizeOfStr).insert(std::make_pair(ctx, std::map<A, size_t>()));
         maps.at(sizeOfStr)[ctx].insert(std::make_pair(c, 1));
     }
 }
 
-void WordModel::addLength(int length)
+template <typename A>
+void MoleculeModel<A>::addLength(int length)
 {
     totalWordsLearned++;
     for (int i = lengthsFrequencies.size(); i < length; i++)
@@ -57,33 +79,36 @@ void WordModel::addLength(int length)
     lengthsFrequencies.at(length - 1)++;
 }
 
-std::string WordModel::aggregateWordGen(std::string begin)
+template <typename A>
+Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
 {
-    size_t sizeOfStr = utf8_length(begin);
-    std::string ctxSearch;
+    size_t sizeOfStr = begin.size(); // utf8_length(begin);
+    Molecule<A> ctxSearch;
     int ctxSize = contextSize - 1;
     if (sizeOfStr < contextSize)
     {
-        ctxSearch = " " + begin;
+        ctxSearch = Molecule<A>(A(" ")) + begin;
         ctxSize = sizeOfStr;
     }
     else
     {
-        int beginIndex = std::max(0, (int)sizeOfStr - (int)contextSize);
-        ctxSearch = (""); // begin.substr(beginIndex, contextSize);
-        for (size_t i = 0; i < contextSize; i++)
-        {
-            ctxSearch += utf8_char_at(begin, beginIndex + i);
-        }
+        // int beginIndex = std::max(0, (int)sizeOfStr - (int)contextSize);
+        // ctxSearch = ""; // begin.substr(beginIndex, contextSize);
+        // for (size_t i = 0; i < contextSize; i++)
+        // {
+        //     ctxSearch += utf8_char_at(begin, beginIndex + i);
+        // }
+        int beginIndex = std::max(0UL, sizeOfStr - contextSize);
+        ctxSearch = begin.subMolecule(beginIndex, beginIndex + contextSize);
     }
     if (!maps.at(ctxSize).count(ctxSearch) || maps.at(ctxSize)[ctxSearch].empty())
-        return begin + "\n";
+        return begin + WordAtom("\n");
 
     size_t sum(0), numberOfEOL(0);
     for (auto it = maps.at(ctxSize)[ctxSearch].begin(); it != maps.at(ctxSize)[ctxSearch].end(); ++it)
     {
         // std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
-        if (it->first.compare("\n") == 0)
+        if (it->first.compare(WordAtom("\n")) == 0)
             numberOfEOL += it->second;
         else
             sum += it->second;
@@ -99,13 +124,13 @@ std::string WordModel::aggregateWordGen(std::string begin)
     sum += EOLMultiplierFactor * numberOfEOL;
 
     if (sum == 0)
-        return begin + "\n";
+        return begin + WordAtom("\n");
 
     size_t indexCharChosen = randint(0, sum - 1);
     for (auto it = maps.at(ctxSize)[ctxSearch].begin(); it != maps.at(ctxSize)[ctxSearch].end(); ++it)
     {
         // std::string current = it->first;
-        if (it->first.compare("\n") == 0)
+        if (it->first.compare(WordAtom("\n")) == 0)
         {
             if (indexCharChosen < it->second * EOLMultiplierFactor)
                 return begin + it->first;
@@ -120,5 +145,5 @@ std::string WordModel::aggregateWordGen(std::string begin)
         }
     }
 
-    return begin + "\n";
+    return begin + WordAtom("\n");
 }

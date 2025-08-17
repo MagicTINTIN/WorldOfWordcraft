@@ -55,15 +55,12 @@ void MoleculeModel<A>::printMaps()
             std::cout << "CONTEXT: " << it->first << std::endl;
             for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2)
             {
-                std::cout << "> '" << it2->first << "': " << it2->second << std::endl;
-                // std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
-                // if (it->first.compare(_end) == 0)
-                //     numberOfEOL += it->second;
-                // else
-                //     sum += it->second;
+                std::cout << "|> '" << it2->first << "': " << it2->second << std::endl;
             }
+            printf("\n");
         }
         size++;
+        printf("\n------------------------\n\n");
     }
 }
 
@@ -132,14 +129,17 @@ Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
         return begin + _end;
 
     size_t sum(0), numberOfEOL(0);
+    // std::cout << ">>> " << ctxSearch << "\n";
     for (auto it = maps.at(ctxSize)[ctxSearch].begin(); it != maps.at(ctxSize)[ctxSearch].end(); ++it)
     {
-        // std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
+        // std::cout << "- Key: " << it->first << ", Value: " << it->second << std::endl;
         if (it->first.compare(_end) == 0)
             numberOfEOL += it->second;
         else
             sum += it->second;
     }
+
+    // printf("\n");
 
     size_t numberOfBiggerWords(0);
     for (size_t indSumIndex = sizeOfStr; indSumIndex < lengthsFrequencies.size(); indSumIndex++)

@@ -95,13 +95,13 @@ public:
     Molecule<A> subMolecule(size_t size)
     {
         Molecule<A> sub;
-        sub.atoms.insert(sub.atoms.end(), atoms.begin(), atoms.begin() + std::min(size, atoms.size()) - 1);
+        sub.atoms.insert(sub.atoms.end(), atoms.begin(), atoms.begin() + std::min(size, atoms.size()));
         
         // std::string ret;
         // for (A a : atoms)
         //     ret += a.to_string();
 
-        sub.str = str.substr(std::min(size, str.size()) - 1);
+        sub.str = str.substr(std::min(size, str.size()));
         return sub;
     }
     Molecule<A> subMolecule(size_t begin, size_t end)
@@ -114,7 +114,7 @@ public:
         // }
 
         Molecule<A> sub;
-        sub.atoms.insert(sub.atoms.end(), atoms.begin() + std::max(0, (int) begin), atoms.begin() + std::min(end, atoms.size()) - 1);
+        sub.atoms.insert(sub.atoms.end(), atoms.begin() + std::max(0, (int) begin), atoms.begin() + std::min(end, atoms.size()));
         
         std::string sub_str;
         for (A a : sub.atoms)

@@ -136,6 +136,7 @@ int main_words(int argc, char const *argv[])
         {
             words.push_back(word + " ");
         }
+            // words.push_back("\n");
         // printf("len=%ld, size=%ld, utf8=%ld\n", cleaned.length(), cleaned.size(), utf8_length(cleaned));
         size_t length = words.size();
         model.addLength(length);
@@ -150,7 +151,8 @@ int main_words(int argc, char const *argv[])
             model.addStr(ctx, words[lastw]);
         }
     }
-    model.printMaps();
+    // printf("\rMaps:\n");
+    // model.printMaps();
     printf("\rStats generated.\nStart generating sentences...\n###########################################\n");
     std::vector<Molecule<WordAtom>> foundSentences(0);
     int maxTries = 0;
@@ -160,6 +162,7 @@ int main_words(int argc, char const *argv[])
         while (newSentence.empty() || newSentence.back().to_string() != "\n")
         {
             newSentence = model.aggregateWordGen(newSentence);
+            // std::cout << "=== " << newSentence << "\n";
         }
         if (wordIn(newSentence, foundSentences))
         {

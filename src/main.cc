@@ -8,7 +8,7 @@
 
 #include "atomsAndMolecules.hh"
 #include "utf8.hh"
-#include "WordModel.hh"
+#include "crafter.hh"
 
 #define DEFAULT_CONTEXT 3
 #define DEFAULT_END_CHANCE_RATIO_PERCENTAGE 0.7

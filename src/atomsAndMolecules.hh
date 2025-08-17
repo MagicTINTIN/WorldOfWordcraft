@@ -13,6 +13,11 @@ public:
     // std::string back() const { return  std::string(1,value.back()); }
     int compare(const WordAtom &other) const { return value != other.value; }
     std::string to_string() const { return value; }
+
+    bool operator<(const WordAtom &atom) const
+    {
+        return to_string() < atom.to_string();
+    }
 };
 
 std::ostream &operator<<(
@@ -40,6 +45,11 @@ public:
         copy.insert(copy.end(), molecule.getAtoms().begin(), molecule.getAtoms().end());
         return copy;
     }
+    bool operator<(const Molecule<A> &molecule) const
+    {
+        return to_string() < molecule.to_string();
+    }
+
     Molecule<A> operator+(const A &atom) const
     {
         std::vector<A> copy = atoms;
@@ -77,9 +87,6 @@ std::ostream &operator<<(
 {
     return std::operator<<(stream, molecule.to_string());
 }
-
-
-
 
 template <typename A>
 bool wordIn(Molecule<A> &molecule, std::vector<Molecule<A>> &list)

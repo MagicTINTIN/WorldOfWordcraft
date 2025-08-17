@@ -6,6 +6,7 @@ mkdir debug 2> /dev/null
 
 makearg=""
 cmakearg=""
+both=0
 folder="build"
 for arg in "$@"; do
     if [ "$arg" = "--release" ]; then
@@ -15,11 +16,18 @@ for arg in "$@"; do
         folder="debug"
     elif [ "$arg" = "--fastcomile" ]; then
         makearg+=" -j4 "
+    elif [ "$arg" = "--both" ]; then
+        both=1
     elif [ "$arg" = "--reset" ]; then
         rm -rf build/*
         rm -rf debug/*
     fi
 done
+
+if [ $both == 1 ]; then
+    ./cmakecompile.sh --fastcomile --debug && ./cmakecompile.sh --fastcomile --release && exit
+    exit
+fi
 
 cd $folder/
 cmake $cmakearg ..

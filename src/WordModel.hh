@@ -48,7 +48,7 @@ MoleculeModel<A>::MoleculeModel(int contextSize, float endRatio) : lengthsFreque
 template <typename A>
 void MoleculeModel<A>::addStr(Molecule<A> ctx, A c)
 {
-    size_t sizeOfStr = ctx.size();// utf8_length(ctx);
+    size_t sizeOfStr = ctx.size(); // utf8_length(ctx);
     if (sizeOfStr < contextSize)
         ctx = Molecule<A>(A(" ")) + ctx;
     else
@@ -82,7 +82,7 @@ void MoleculeModel<A>::addLength(int length)
 template <typename A>
 Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
 {
-    size_t sizeOfStr = begin.size(); //utf8_length(begin);
+    size_t sizeOfStr = begin.size(); // utf8_length(begin);
     Molecule<A> ctxSearch;
     int ctxSize = contextSize - 1;
     if (sizeOfStr < contextSize)
@@ -98,7 +98,8 @@ Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
         // {
         //     ctxSearch += utf8_char_at(begin, beginIndex + i);
         // }
-        ctxSearch = begin.subMolecule(contextSize);
+        int beginIndex = std::max(0UL, sizeOfStr - contextSize);
+        ctxSearch = begin.subMolecule(beginIndex, beginIndex + contextSize);
     }
     if (!maps.at(ctxSize).count(ctxSearch) || maps.at(ctxSize)[ctxSearch].empty())
         return begin + WordAtom("\n");

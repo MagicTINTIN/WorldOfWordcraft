@@ -80,6 +80,25 @@ public:
         sub.str = str.substr(std::min(size, str.size()) - 1);
         return sub;
     }
+    Molecule<A> subMolecule(size_t begin, size_t end)
+    {
+        // if (begin > end)
+        // {
+        //     tmp = begin;
+        //     begin = end;
+        //     end = tmp;
+        // }
+
+        Molecule<A> sub;
+        sub.atoms.insert(sub.atoms.end(), atoms.begin() + std::max(0, (int) begin), atoms.begin() + std::min(end, atoms.size()) - 1);
+        
+        // std::string ret;
+        // for (A a : atoms)
+        //     ret += a.to_string();
+
+        sub.str = str.substr(std::max(0, (int) begin), std::min(end, str.size()) - 1);
+        return sub;
+    }
     std::string to_string() const
     {
         return str;

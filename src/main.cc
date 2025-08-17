@@ -10,8 +10,8 @@
 #include "utf8.hh"
 #include "crafter.hh"
 
-#define DEFAULT_CONTEXT 3
-#define DEFAULT_END_CHANCE_RATIO_PERCENTAGE 0.7
+#define DEFAULT_CONTEXT 4
+#define DEFAULT_END_CHANCE_RATIO_PERCENTAGE 0.5
 #define MAX_GENERATION_TRIES 500
 
 bool wordIn(const std::string &word, const std::vector<std::string> &list)
@@ -45,7 +45,7 @@ int main(int argc, char const *argv[])
         end_ratio = atof(argv[5]);
     }
 
-    MoleculeModel<WordAtom> model(contextSize, end_ratio);
+    MoleculeModel<WordAtom> model(contextSize, end_ratio, WordAtom(" "), WordAtom("\n"));
 
     std::ifstream infile(argv[1]);
     std::ofstream outfile(argv[2]);

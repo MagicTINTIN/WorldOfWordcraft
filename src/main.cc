@@ -13,6 +13,7 @@
 
 #define DEFAULT_CONTEXT 4
 #define DEFAULT_END_CHANCE_RATIO_PERCENTAGE 0.5
+#define DEFAULT_CHAOS 0.
 #define MAX_GENERATION_TRIES 500
 
 int main_chars(int argc, char const *argv[])
@@ -29,7 +30,13 @@ int main_chars(int argc, char const *argv[])
         end_ratio = atof(argv[6]);
     }
 
-    MoleculeModel<CharAtom> model(contextSize, end_ratio, CharAtom(" "), CharAtom("\n"));
+    float chaos = DEFAULT_CHAOS;
+    if (argc >= 8)
+    {
+        chaos = atof(argv[7]);
+    }
+
+    MoleculeModel<CharAtom> model(contextSize, end_ratio, chaos, CharAtom(" "), CharAtom("\n"));
 
     std::ifstream infile(argv[2]);
     std::ofstream outfile(argv[3]);
@@ -108,7 +115,13 @@ int main_words(int argc, char const *argv[])
         end_ratio = atof(argv[6]);
     }
 
-    MoleculeModel<WordAtom> model(contextSize, end_ratio, WordAtom("\t"), WordAtom("\n"));
+    float chaos = DEFAULT_CHAOS;
+    if (argc >= 8)
+    {
+        chaos = atof(argv[7]);
+    }
+
+    MoleculeModel<WordAtom> model(contextSize, end_ratio, chaos, WordAtom("\t"), WordAtom("\n"));
 
     std::ifstream infile(argv[2]);
     std::ofstream outfile(argv[3]);
@@ -194,10 +207,10 @@ int main_words(int argc, char const *argv[])
 
 int main(int argc, char const *argv[])
 {
-    if (argc < 5 || argc > 7)
+    if (argc < 5 || argc > 8)
     {
         std::cerr << "Usage: \n";
-        std::cerr << argv[0] << " <mode=char|word><source_file> <output_file> <number_of_words_to_generate> [context_size] [end_ratio]\n";
+        std::cerr << argv[0] << " <mode=char|word><source_file> <output_file> <number_of_words_to_generate> [context_size] [end_ratio] [chaos]\n";
         return 1;
     }
 

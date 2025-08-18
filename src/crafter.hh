@@ -8,6 +8,7 @@
 #include <memory>
 #include "atomsAndMolecules.hh"
 
+#define MAX_TOKEN_AGGREGATED 5000
 #include "utf8.hh"
 
 /* ############### Molecule TEMPLATE IMPLEMENTATION ############### */
@@ -20,14 +21,15 @@ class MoleculeModel
 private:
     std::vector<size_t> lengthsFrequencies;
     std::vector<std::map<Molecule<A>, std::map<A, size_t>>> maps;
-    unsigned int contextSize;
+    const unsigned int contextSize;
     size_t totalWordsLearned;
     float end_ratio;
     const A _begin;
     const A _end;
+    const float _chaos;
 
 public:
-    MoleculeModel(int contextSize, float endRatio, A beginAtom, A endAtom);
+    MoleculeModel(int contextSize, float endRatio, float chaos, A beginAtom, A endAtom);
     void addStr(Molecule<A> str, A c);
     void addLength(int length);
     Molecule<A> aggregateWordGen(Molecule<A> begin);
@@ -65,7 +67,7 @@ void MoleculeModel<A>::printMaps()
 }
 
 template <typename A>
-MoleculeModel<A>::MoleculeModel(int contextSize, float endRatio, A beginAtom, A endAtom) : lengthsFrequencies(20), maps(contextSize), contextSize(contextSize), end_ratio(endRatio), _begin(beginAtom), _end(endAtom)
+MoleculeModel<A>::MoleculeModel(int contextSize, float endRatio, float chaos, A beginAtom, A endAtom) : lengthsFrequencies(20), maps(contextSize), contextSize(contextSize), _chaos(1.0 - chaos), end_ratio(endRatio), _begin(beginAtom), _end(endAtom)
 {
 }
 
@@ -125,7 +127,7 @@ Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
         int beginIndex = std::max(0UL, sizeOfStr - contextSize);
         ctxSearch = begin.subMolecule(beginIndex, beginIndex + contextSize);
     }
-    if (!maps.at(ctxSize).count(ctxSearch) || maps.at(ctxSize)[ctxSearch].empty())
+    if (!maps.at(ctxSize).count(ctxSearch) || maps.at(ctxSize)[ctxSearch].empty() || sizeOfStr > MAX_TOKEN_AGGREGATED)
         return begin + _end;
 
     size_t sum(0), numberOfEOL(0);
@@ -134,9 +136,9 @@ Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
     {
         // std::cout << "- Key: " << it->first << ", Value: " << it->second << std::endl;
         if (it->first.compare(_end) == 0)
-            numberOfEOL += it->second;
+            numberOfEOL += 1 + (_chaos * (it->second - 1));
         else
-            sum += it->second;
+            sum += 1 + (_chaos * (it->second - 1));
     }
 
     // printf("\n");
@@ -159,16 +161,16 @@ Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
         // std::string current = it->first;
         if (it->first.compare(_end) == 0)
         {
-            if (indexCharChosen < it->second * EOLMultiplierFactor)
+            if (indexCharChosen < 1 + (_chaos * (it->second - 1)) * EOLMultiplierFactor)
                 return begin + it->first;
-            indexCharChosen -= it->second * EOLMultiplierFactor;
+            indexCharChosen -= 1 + (_chaos * (it->second - 1)) * EOLMultiplierFactor;
         }
         else
         {
-            // std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
-            if (indexCharChosen < it->second)
+            // std::cout << "Key: " << it->first << ", Value: " << 1 + (_chaos * (it->second - 1)) << std::endl;
+            if (indexCharChosen < 1 + (_chaos * (it->second - 1)))
                 return begin + it->first;
-            indexCharChosen -= it->second;
+            indexCharChosen -= 1 + (_chaos * (it->second - 1));
         }
     }
 

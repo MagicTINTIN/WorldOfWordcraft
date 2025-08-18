@@ -5,14 +5,44 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Wow",
+            "name": "Wow (char)",
             "type": "cppdbg",
             "request": "launch",
             // "program": "${workspaceFolder}/${fileBasename}.out",
             "program": "${workspaceFolder}/debug/wow",
             // "args": ["dict1", "dict3", "10"],
             // "args": ["${workspaceFolder}/../dictionnaire_francais.txt", "dict3", "150"],
-            "args": ["${workspaceFolder}/../../c/dictionnaire_francais.txt", "data/dictOut", "100", "4", "0.5"],
+            // "args": ["${workspaceFolder}/../../c/dictionnaire_francais.txt", "data/dictOut", "100", "4", "0.5"],
+            "args": ["char", "${workspaceFolder}/../../c/commonphrases.txt", "data/pOut", "100", "8", "0.5", "1."],
+            // "args": ["${workspaceFolder}/../dictionnaire_francais.txt", "dict3", "150", "3", "0.5"],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Wow (word)",
+            "type": "cppdbg",
+            "request": "launch",
+            // "program": "${workspaceFolder}/${fileBasename}.out",
+            "program": "${workspaceFolder}/debug/wow",
+            // "args": ["dict1", "dict3", "10"],
+            // "args": ["${workspaceFolder}/../dictionnaire_francais.txt", "dict3", "150"],
+            // "args": ["${workspaceFolder}/../../c/dictionnaire_francais.txt", "data/dictOut", "100", "4", "0.5"],
+            "args": ["word", "${workspaceFolder}/../../c/commonphrases.txt", "data/pOut", "200", "2", "0.5", "1."],
             // "args": ["${workspaceFolder}/../dictionnaire_francais.txt", "dict3", "150", "3", "0.5"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

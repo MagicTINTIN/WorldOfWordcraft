@@ -27,9 +27,10 @@ private:
     const A _begin;
     const A _end;
     const float _chaos;
+    const unsigned int _contextVariation;
 
 public:
-    MoleculeModel(int contextSize, float endRatio, float chaos, A beginAtom, A endAtom);
+    MoleculeModel(int contextSize, float endRatio, float chaos, unsigned int contextVariation, A beginAtom, A endAtom);
     void addStr(Molecule<A> str, A c);
     void addLength(int length);
     Molecule<A> aggregateWordGen(Molecule<A> begin);
@@ -67,7 +68,7 @@ void MoleculeModel<A>::printMaps()
 }
 
 template <typename A>
-MoleculeModel<A>::MoleculeModel(int contextSize, float endRatio, float chaos, A beginAtom, A endAtom) : lengthsFrequencies(20), maps(contextSize), contextSize(contextSize), _chaos(1.0 - chaos), end_ratio(endRatio), _begin(beginAtom), _end(endAtom)
+MoleculeModel<A>::MoleculeModel(int contextSize, float endRatio, float chaos, unsigned int contextVariation, A beginAtom, A endAtom) : lengthsFrequencies(20), maps(contextSize), contextSize(contextSize), _chaos(1.0 - chaos), end_ratio(endRatio), _contextVariation(contextVariation), _begin(beginAtom), _end(endAtom)
 {
 }
 
@@ -79,17 +80,22 @@ void MoleculeModel<A>::addStr(Molecule<A> ctx, A c)
         ctx = Molecule<A>(_begin) + ctx;
     else
         sizeOfStr--;
-    if (maps.at(sizeOfStr).count(ctx))
+    // int a = std::max(sizeOfStr - _contextVariation, 0UL);
+    for (size_t cxsz = std::max((int)sizeOfStr - (int) _contextVariation, 0); cxsz <= sizeOfStr; cxsz++)
     {
-        if (maps.at(sizeOfStr)[ctx].count(c))
-            maps.at(sizeOfStr)[ctx][c]++;
+        Molecule<A> sctx(ctx.subMolecule(sizeOfStr - cxsz, sizeOfStr + 1));
+        if (maps.at(cxsz).count(sctx))
+        {
+            if (maps.at(cxsz)[sctx].count(c))
+                maps.at(cxsz)[sctx][c]++;
+            else
+                maps.at(cxsz)[sctx].insert(std::make_pair(c, 1));
+        }
         else
-            maps.at(sizeOfStr)[ctx].insert(std::make_pair(c, 1));
-    }
-    else
-    {
-        maps.at(sizeOfStr).insert(std::make_pair(ctx, std::map<A, size_t>()));
-        maps.at(sizeOfStr)[ctx].insert(std::make_pair(c, 1));
+        {
+            maps.at(cxsz).insert(std::make_pair(sctx, std::map<A, size_t>()));
+            maps.at(cxsz)[sctx].insert(std::make_pair(c, 1));
+        }
     }
 }
 
@@ -124,31 +130,36 @@ Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
         // {
         //     ctxSearch += utf8_char_at(begin, beginIndex + i);
         // }
-        int beginIndex = std::max(0UL, sizeOfStr - contextSize);
+        int beginIndex = std::max(0, (int) sizeOfStr - (int) contextSize);
         ctxSearch = begin.subMolecule(beginIndex, beginIndex + contextSize);
     }
     if (!maps.at(ctxSize).count(ctxSearch) || maps.at(ctxSize)[ctxSearch].empty() || sizeOfStr > MAX_TOKEN_AGGREGATED)
         return begin + _end;
 
-    size_t sum(0), numberOfEOL(0);
+    size_t sum(0), numberOfEOL(0), sizeCtx(ctxSearch.size());
     // std::cout << ">>> " << ctxSearch << "\n";
-    for (auto it = maps.at(ctxSize)[ctxSearch].begin(); it != maps.at(ctxSize)[ctxSearch].end(); ++it)
+    for (size_t cxsz = std::max((int)sizeCtx - (int) _contextVariation - 1, 0); cxsz < sizeCtx; cxsz++)
     {
-        // std::cout << "- Key: " << it->first << ", Value: " << it->second << std::endl;
-        if (it->first.compare(_end) == 0)
-            numberOfEOL += 1 + (_chaos * (it->second - 1));
-        else
-            sum += 1 + (_chaos * (it->second - 1));
+        Molecule<A> subCtxSearch(ctxSearch.subMolecule(sizeCtx - cxsz - 1, sizeCtx));
+        for (auto it = maps.at(cxsz)[subCtxSearch].begin(); it != maps.at(cxsz)[subCtxSearch].end(); ++it)
+        {
+            // std::cout << "- Key: " << it->first << ", Value: " << it->second << std::endl;
+            unsigned int weight = (1 + (_chaos * (it->second - 1))) * std::pow(cxsz + 1, 2);
+            if (it->first.compare(_end) == 0)
+                numberOfEOL += weight;
+            else
+                sum += weight;
+        }
     }
 
     // printf("\n");
 
-    size_t numberOfBiggerWords(0);
+    size_t numberOfBiggerMolecule(0);
     for (size_t indSumIndex = sizeOfStr; indSumIndex < lengthsFrequencies.size(); indSumIndex++)
     {
-        numberOfBiggerWords += lengthsFrequencies[indSumIndex];
+        numberOfBiggerMolecule += lengthsFrequencies[indSumIndex];
     }
-    float ratioPhase = end_ratio * (totalWordsLearned - numberOfBiggerWords) / totalWordsLearned;
+    float ratioPhase = end_ratio * (totalWordsLearned - numberOfBiggerMolecule) / totalWordsLearned;
     float EOLMultiplierFactor = numberOfEOL == 0 ? 0 : (ratioPhase * sum) / ((1 - ratioPhase) * numberOfEOL);
     sum += EOLMultiplierFactor * numberOfEOL;
 
@@ -156,21 +167,26 @@ Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
         return begin + _end;
 
     size_t indexCharChosen = randint(0, sum - 1);
-    for (auto it = maps.at(ctxSize)[ctxSearch].begin(); it != maps.at(ctxSize)[ctxSearch].end(); ++it)
+    for (size_t cxsz = std::max((int)sizeCtx - (int) _contextVariation - 1, 0); cxsz < sizeCtx; cxsz++)
     {
-        // std::string current = it->first;
-        if (it->first.compare(_end) == 0)
+        Molecule<A> subCtxSearch(ctxSearch.subMolecule(sizeCtx - cxsz - 1, sizeCtx));
+        for (auto it = maps.at(cxsz)[subCtxSearch].begin(); it != maps.at(cxsz)[subCtxSearch].end(); ++it)
         {
-            if (indexCharChosen < 1 + (_chaos * (it->second - 1)) * EOLMultiplierFactor)
-                return begin + it->first;
-            indexCharChosen -= 1 + (_chaos * (it->second - 1)) * EOLMultiplierFactor;
-        }
-        else
-        {
-            // std::cout << "Key: " << it->first << ", Value: " << 1 + (_chaos * (it->second - 1)) << std::endl;
-            if (indexCharChosen < 1 + (_chaos * (it->second - 1)))
-                return begin + it->first;
-            indexCharChosen -= 1 + (_chaos * (it->second - 1));
+            unsigned int weight = (1 + (_chaos * (it->second - 1))) * std::pow(cxsz + 1, 2);
+            // std::string current = it->first;
+            if (it->first.compare(_end) == 0)
+            {
+                if (indexCharChosen < weight * EOLMultiplierFactor)
+                    return begin + it->first;
+                indexCharChosen -= weight * EOLMultiplierFactor;
+            }
+            else
+            {
+                // std::cout << "Key: " << it->first << ", Value: " << weight << std::endl;
+                if (indexCharChosen < weight)
+                    return begin + it->first;
+                indexCharChosen -= weight;
+            }
         }
     }
 

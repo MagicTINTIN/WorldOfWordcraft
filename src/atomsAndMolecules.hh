@@ -61,8 +61,11 @@ private:
 
 public:
     Molecule() : atoms() {};
-    Molecule(A atom) : atoms{atom} {};
-    Molecule(std::vector<A> atoms_array) : atoms(atoms_array) {};
+    Molecule(A atom) : atoms{atom}, str(atom.to_string()) {};
+    Molecule(std::vector<A> atoms_array) : atoms(atoms_array) {
+        for (const A &a : atoms_array)
+            str += a.to_string();
+    };
     size_t size() const { return atoms.size(); };
     std::vector<A> getAtoms() const { return atoms; }
     Molecule<A> operator+(const Molecule<A> &molecule) const
@@ -117,7 +120,7 @@ public:
         sub.atoms.insert(sub.atoms.end(), atoms.begin() + std::max(0, (int) begin), atoms.begin() + std::min(end, atoms.size()));
         
         std::string sub_str;
-        for (A a : sub.atoms)
+        for (const A &a : sub.atoms)
             sub_str += a.to_string();
 
         sub.str = sub_str;//str.substr(std::max(0, (int) begin), std::min(end, str.size()) - 1);

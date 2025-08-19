@@ -28,9 +28,10 @@ private:
     const A _end;
     const float _chaos;
     const unsigned int _contextVariation;
+    const unsigned int _seriousness;
 
 public:
-    MoleculeModel(int contextSize, float endRatio, float chaos, unsigned int contextVariation, A beginAtom, A endAtom);
+    MoleculeModel(int contextSize, float endRatio, float chaos, unsigned int contextVariation, unsigned int seriousness, A beginAtom, A endAtom);
     void addStr(Molecule<A> str, A c);
     void addLength(int length);
     Molecule<A> aggregateWordGen(Molecule<A> begin);
@@ -68,7 +69,7 @@ void MoleculeModel<A>::printMaps()
 }
 
 template <typename A>
-MoleculeModel<A>::MoleculeModel(int contextSize, float endRatio, float chaos, unsigned int contextVariation, A beginAtom, A endAtom) : lengthsFrequencies(20), maps(contextSize), contextSize(contextSize), _chaos(1.0 - chaos), end_ratio(endRatio), _contextVariation(contextVariation), _begin(beginAtom), _end(endAtom)
+MoleculeModel<A>::MoleculeModel(int contextSize, float endRatio, float chaos, unsigned int contextVariation, unsigned int seriousness, A beginAtom, A endAtom) : lengthsFrequencies(20), maps(contextSize), contextSize(contextSize), _chaos(1.0 - chaos), end_ratio(endRatio), _contextVariation(contextVariation), _seriousness(seriousness), _begin(beginAtom), _end(endAtom)
 {
 }
 
@@ -144,7 +145,7 @@ Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
         for (auto it = maps.at(cxsz)[subCtxSearch].begin(); it != maps.at(cxsz)[subCtxSearch].end(); ++it)
         {
             // std::cout << "- Key: " << it->first << ", Value: " << it->second << std::endl;
-            unsigned int weight = (1 + (_chaos * (it->second - 1))) * std::pow(cxsz + 1, 2);
+            unsigned int weight = (1 + (_chaos * (it->second - 1))) * std::pow(cxsz + 1, _seriousness);
             if (it->first.compare(_end) == 0)
                 numberOfEOL += weight;
             else
@@ -172,7 +173,7 @@ Molecule<A> MoleculeModel<A>::aggregateWordGen(Molecule<A> begin)
         Molecule<A> subCtxSearch(ctxSearch.subMolecule(sizeCtx - cxsz - 1, sizeCtx));
         for (auto it = maps.at(cxsz)[subCtxSearch].begin(); it != maps.at(cxsz)[subCtxSearch].end(); ++it)
         {
-            unsigned int weight = (1 + (_chaos * (it->second - 1))) * std::pow(cxsz + 1, 2);
+            unsigned int weight = (1 + (_chaos * (it->second - 1))) * std::pow(cxsz + 1, _seriousness);
             // std::string current = it->first;
             if (it->first.compare(_end) == 0)
             {

@@ -10,6 +10,7 @@
 #include "atomsAndMolecules.hh"
 #include "utf8.hh"
 #include "crafter.hh"
+#include <string.h>
 
 #define DEFAULT_CONTEXT 4
 #define DEFAULT_CONTEXT_VARIATION 1
@@ -85,8 +86,8 @@ int main_chars(int argc, char const *argv[])
             model.addStr(ctx, charToPut);
         }
     }
-    printf("\n");
-    model.printMaps();
+    // printf("\n");
+    // model.printMaps();
     printf("\rStats generated.\nStart generating words...\n###########################################\n");
     std::vector<Molecule<CharAtom>> foundWords(0);
     int maxTries = 0;
@@ -233,10 +234,31 @@ int main_words(int argc, char const *argv[])
 
 int main(int argc, char const *argv[])
 {
-    if (argc < 5 || argc > 10)
+    int nohelp = 1;
+    for (int argnb = 0; argnb < argc; argnb++)
+    {
+        nohelp *= strncmp("--help", argv[argnb], 6) * strncmp("-h", argv[argnb], 2);
+    }
+    
+    if (argc < 5 || argc > 10 || !nohelp)
     {
         std::cerr << "Usage: \n";
-        std::cerr << argv[0] << " <mode=char|word><source_file> <output_file> <number_of_words_to_generate> [context_size] [end_ratio] [chaos] [context_variation] [seriousness]\n";
+        std::cerr << argv[0] << " <mode=char|word> <source_file> <output_file> <number_of_generations> [context_size] [end_ratio] [chaos] [context_variation] [seriousness]\n";
+        std::cerr << "MANDATORY ARGUMENTS:\n";
+        std::cerr << "  mode: 'char' or 'word'        -- learned tokens\n";
+        std::cerr << "  source_file: path/to/file     -- input file to learn\n";
+        std::cerr << "  output_file: path/to/file     -- output file containing generated\n";
+        std::cerr << "  number_of_generations: int 1+ -- number of generated lines\n";
+        std::cerr << "  \n";
+        std::cerr << "OPTIONAL ARGUMENTS:\n";
+        std::cerr << "  context_size:      int   1;inf   -- statistics context to choose next token (1: only depends on last char, inf: overfit training)\n";
+        std::cerr << "  end_ratio:         float 0.;1.   -- probability to end the line (0: biggest lines, 1 smallest lines)\n";
+        std::cerr << "  chaos:             float -inf;1. -- probability of tokens ponderation (1: equiprobability, 0: natural, -: amplified)\n";
+        std::cerr << "  context_variation: int   0;cs    -- randomly reduce size of context (0: constant context size, cs=context_size: sometimes no context for next token)\n";
+        std::cerr << "  seriousness:       int   0;inf   -- ponderation of variations cs^srx (0: all variations equiprobable, inf: bigger chances to have a big context)\n";
+        // std::cerr << "  \n";
+        if (!nohelp)
+            return 0;
         return 1;
     }
 

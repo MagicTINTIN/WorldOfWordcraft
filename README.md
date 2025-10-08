@@ -1,4 +1,6 @@
 # World Of Wordcraft
+<img src="worldofwordcraft.png">
+
 > a word generator based on an input dictionary and occurrence statistics *(machine learning du pauvre)*
 
 ---
